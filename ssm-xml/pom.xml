@@ -211,6 +211,11 @@
                         </goals>
                         <configuration>
                             <target>
+                                <!-- 删除原有解压目录 -->
+                                <delete dir="../apache-tomcat-8.5.57-src/catalina-home/webapps/ssm-xml"/>
+                                <delete dir="../apache-tomcat-8.5.57-src/catalina-home/webapps/ssm-xml.war"/>
+
+                                <!-- 拷贝新的 war 文件 -->
                                 <copy file="${project.build.directory}/${project.build.finalName}.war"
                                       tofile="../apache-tomcat-8.5.57-src/catalina-home/webapps/ssm-xml.war"/>
                             </target>

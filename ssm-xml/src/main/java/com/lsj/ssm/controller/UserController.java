@@ -1,10 +1,11 @@
 package com.lsj.ssm.controller;
 
 import com.lsj.ssm.common.Result;
+import com.lsj.ssm.config.Address;
 import com.lsj.ssm.entity.User;
 import com.lsj.ssm.service.UserService;
-import lombok.extern.java.Log;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.lsj.ssm.vo.UserInfoVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,38 +19,42 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("user")
-@Log
+@RequestMapping("/user")
+@Slf4j
 public class UserController extends BaseController {
-
-    // @Autowired
-    // private UserService userService;
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    private final Address address;
+
+    public UserController(UserService userService, Address address) {
         this.userService = userService;
+        this.address = address;
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Integer id) {
+    public UserInfoVO getUser(@PathVariable Integer id) {
         String threadName = Thread.currentThread().getName();
-        System.out.println("【处理请求线程】" + threadName);
-        log.info("UserController getUser 【处理请求线程】: " + threadName);
-        return userService.getUser(id);
+        log.info("UserController#getUser【处理请求线程】: {}", threadName);
+        User user = userService.getUser(id);
+        UserInfoVO userInfoVO = UserInfoVO.builder().build()
+                .setUser(user)
+                .setAddress(address);
+        log.warn(">>> 查询id: {} 对应的用户: {}", id, userInfoVO);
+        return userInfoVO;
     }
 
     @GetMapping("/all")
     public List<User> getAllUsers() {
         String threadName = Thread.currentThread().getName();
-        log.info("UserController getAllUsers 【处理请求线程】: " + threadName);
+        log.info("UserController#getAllUsers【处理请求线程】: {}", threadName);
         return userService.listUser();
     }
 
     @PostMapping("/add")
     public Result<Void> addUser(@RequestBody User user) {
         String threadName = Thread.currentThread().getName();
-        log.info("UserController addUser 【处理请求线程】: " + threadName);
+        log.info("UserController#addUser【处理请求线程】: {}", threadName);
         int rows = userService.addUser(user);
         return toResult(rows);
     }
@@ -57,18 +62,33 @@ public class UserController extends BaseController {
     @PutMapping("/update")
     public Result<Void> updateUser(@RequestBody User user) {
         String threadName = Thread.currentThread().getName();
-        log.info("UserController updateUser 【处理请求线程】: " + threadName);
+        log.info("UserController#updateUser【处理请求线程】: {}", threadName);
         int rows = userService.updateUser(user);
+        return toResult(rows);
+    }
+
+    @PutMapping("/updateUserException")
+    public Result<Void> updateUserException(@RequestBody User user) {
+        String threadName = Thread.currentThread().getName();
+        log.info("UserController#updateUserException【处理请求线程】: {}", threadName);
+        int rows = userService.updateUserException(user);
+        return toResult(rows);
+    }
+
+    @PutMapping("/updateUserCatchException")
+    public Result<Void> updateUserCatchException(@RequestBody User user) {
+        String threadName = Thread.currentThread().getName();
+        log.info("UserController#updateUserCatchException【处理请求线程】: {}", threadName);
+        int rows = userService.updateUserCatchException(user);
         return toResult(rows);
     }
 
     @DeleteMapping("/delete/{id}")
     public Result<Void> deleteUser(@PathVariable Integer id) {
         String threadName = Thread.currentThread().getName();
-        log.info("UserController deleteUser 【处理请求线程】: " + threadName);
+        log.info("UserController#deleteUser【处理请求线程】: {}", threadName);
         int rows = userService.deleteUser(id);
         return toResult(rows);
     }
-
 
 }
