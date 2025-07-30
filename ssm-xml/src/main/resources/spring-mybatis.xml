@@ -9,7 +9,7 @@
 
 
     <!-- 引入基础配置 -->
-    <import resource="classpath:application.xml"/>
+    <import resource="classpath:applicationContext.xml"/>
 
     <bean name="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
         <property name="driverClassName" value="${jdbc.driver}"/>

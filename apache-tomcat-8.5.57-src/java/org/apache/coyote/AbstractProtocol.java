@@ -583,7 +583,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         String endpointName = getName();
         endpoint.setName(endpointName.substring(1, endpointName.length()-1));
         endpoint.setDomain(domain);
-
+        System.out.println("AbstractProtocol initialize endpoint: " + endpoint);
         endpoint.init();
     }
 
@@ -593,7 +593,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         if (getLog().isInfoEnabled()) {
             getLog().info(sm.getString("abstractProtocolHandler.start", getName()));
         }
-
+        System.out.println("AbstractProtocol start endpoint: " + endpoint);
         endpoint.start();
 
         // Start timeout thread

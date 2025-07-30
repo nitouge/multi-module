@@ -845,6 +845,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         }
         // Initialize our defined Services
         for (Service service : services) {
+            log.info(">>>>>>>>>>>>> Initialize the service name: " + service.getName() + ", service: " + service);
             service.init();
         }
     }
