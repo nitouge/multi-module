@@ -71,9 +71,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
      * Construct a default instance of this class.
      */
     public StandardServer() {
-
         super();
-
         globalNamingResources = new NamingResourcesImpl();
         globalNamingResources.setContainer(this);
 
@@ -83,7 +81,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         } else {
             namingContextListener = null;
         }
-
+        System.out.println(">>>>>> StandardServer constructor called");
     }
 
 
@@ -845,6 +843,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         }
         // Initialize our defined Services
         for (Service service : services) {
+            System.out.println(">>>>>>>>>>>>> Initialize the service name: " + service.getName() + ", service: " + service);
             service.init();
         }
     }

@@ -71,3 +71,5 @@ nbdist/
 
 .flattened-pom.xml
 pom-xml-flattend
+
+apache-tomcat-8.5.57-src/catalina-home/webapps/ssm-xml/*

@@ -64,8 +64,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
     /**
      * The string manager for this package.
      */
-    private static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+    private static final StringManager sm = StringManager.getManager(Constants.Package);
 
     /**
      * The <code>Server</code> that owns this Service, if any.
@@ -425,7 +424,9 @@ public class StandardService extends LifecycleMBeanBase implements Service {
 
         synchronized (executors) {
             for (Executor executor: executors) {
+                System.out.println("Start Tomcat Executor: " + executor.getName());
                 executor.start();
+                System.out.println("Tomcat Executor start finish state: " + executor.getState());
             }
         }
 
@@ -531,7 +532,9 @@ public class StandardService extends LifecycleMBeanBase implements Service {
         super.initInternal();
 
         if (engine != null) {
+            System.out.println("StandardService >>>>>> init engine start: " + engine);
             engine.init();
+            System.out.println("StandardService >>>>>>  init engine finished: " + engine.getName());
         }
 
         // Initialize any Executors
@@ -539,17 +542,23 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             if (executor instanceof JmxEnabled) {
                 ((JmxEnabled) executor).setDomain(getDomain());
             }
+            System.out.println("StandardService >>>>>> init executor start:  " + executor);
             executor.init();
+            System.out.println("StandardService >>>>>>  init executor finished: " + executor.getName());
         }
 
         // Initialize mapper listener
+        System.out.println("StandardService >>>>>> init mapper listener start: " + mapperListener);
         mapperListener.init();
+        System.out.println("StandardService >>>>>>  init mapper listener finished: " + mapperListener.getDomain());
 
         // Initialize our defined Connectors
         synchronized (connectorsLock) {
             for (Connector connector : connectors) {
                 try {
+                    System.out.println("StandardService >>>>>> init connector start: " + connector);
                     connector.init();
+                    System.out.println("StandardService >>>>>>  init connector finished: " + connector.getScheme());
                 } catch (Exception e) {
                     String message = sm.getString(
                             "standardService.connector.initFailed", connector);

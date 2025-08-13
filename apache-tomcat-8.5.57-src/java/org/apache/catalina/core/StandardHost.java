@@ -39,6 +39,7 @@ import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleListener;
+import org.apache.catalina.Pipeline;
 import org.apache.catalina.Valve;
 import org.apache.catalina.loader.WebappClassLoaderBase;
 import org.apache.catalina.util.ContextName;
@@ -65,9 +66,13 @@ public class StandardHost extends ContainerBase implements Host {
      * Create a new StandardHost component with the default basic Valve.
      */
     public StandardHost() {
-
         super();
+        System.out.println("\n****************************************************\nStandardHost constructor called");
         pipeline.setBasic(new StandardHostValve());
+        System.out.println("StandardHost pipeline : [" + pipeline.hashCode() + "]"
+                + "\n basic valve: " + pipeline.getBasic()
+                + "\n valves: " + Arrays.toString(pipeline.getValves())
+                + "\n****************************************************\n");
 
     }
 
@@ -117,8 +122,7 @@ public class StandardHost extends ContainerBase implements Host {
      * The Java class name of the default Context implementation class for
      * deployed web applications.
      */
-    private String contextClass =
-        "org.apache.catalina.core.StandardContext";
+    private String contextClass = "org.apache.catalina.core.StandardContext";
 
 
     /**
@@ -145,8 +149,7 @@ public class StandardHost extends ContainerBase implements Host {
      * The Java class name of the default error reporter implementation class
      * for deployed web applications.
      */
-    private String errorReportValveClass =
-        "org.apache.catalina.valves.ErrorReportValve";
+    private String errorReportValveClass = "org.apache.catalina.valves.ErrorReportValve";
 
 
     /**
@@ -813,13 +816,14 @@ public class StandardHost extends ContainerBase implements Host {
      */
     @Override
     protected synchronized void startInternal() throws LifecycleException {
-
         // Set error report valve
         String errorValve = getErrorReportValveClass();
+        Pipeline pipeline = getPipeline();
+        System.out.println("StandardHost >>> Pipeline set error report valve: " + Arrays.toString(pipeline.getValves()));
         if ((errorValve != null) && (!errorValve.equals(""))) {
             try {
                 boolean found = false;
-                Valve[] valves = getPipeline().getValves();
+                Valve[] valves = pipeline.getValves();
                 for (Valve valve : valves) {
                     if (errorValve.equals(valve.getClass().getName())) {
                         found = true;
@@ -827,17 +831,15 @@ public class StandardHost extends ContainerBase implements Host {
                     }
                 }
                 if(!found) {
-                    Valve valve =
-                        (Valve) Class.forName(errorValve).getConstructor().newInstance();
-                    getPipeline().addValve(valve);
+                    Valve valve = (Valve) Class.forName(errorValve).getConstructor().newInstance();
+                    pipeline.addValve(valve);
                 }
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
-                log.error(sm.getString(
-                        "standardHost.invalidErrorReportValveClass",
-                        errorValve), t);
+                log.error(sm.getString("standardHost.invalidErrorReportValveClass", errorValve), t);
             }
         }
+        System.out.println("StandardHost >>> Valves after startInternal: " + Arrays.toString(pipeline.getValves()));
         super.startInternal();
     }
 

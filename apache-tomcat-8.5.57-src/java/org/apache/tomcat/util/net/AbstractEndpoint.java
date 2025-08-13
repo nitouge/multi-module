@@ -1063,8 +1063,7 @@ public abstract class AbstractEndpoint<S> {
      *
      * @return if processing was triggered successfully
      */
-    public boolean processSocket(SocketWrapperBase<S> socketWrapper,
-            SocketEvent event, boolean dispatch) {
+    public boolean processSocket(SocketWrapperBase<S> socketWrapper, SocketEvent event, boolean dispatch) {
         try {
             if (socketWrapper == null) {
                 return false;
@@ -1197,10 +1196,10 @@ public abstract class AbstractEndpoint<S> {
     protected final void startAcceptorThreads() {
         int count = getAcceptorThreadCount();
         acceptors = new Acceptor[count];
-
         for (int i = 0; i < count; i++) {
             acceptors[i] = createAcceptor();
             String threadName = getName() + "-Acceptor-" + i;
+            System.out.println("启动Acceptor线程：" + threadName);
             acceptors[i].setThreadName(threadName);
             Thread t = new Thread(acceptors[i], threadName);
             t.setPriority(getAcceptorThreadPriority());
@@ -1267,6 +1266,7 @@ public abstract class AbstractEndpoint<S> {
         if (connectionLimitLatch==null) {
             connectionLimitLatch = new LimitLatch(getMaxConnections());
         }
+        System.out.println(">>>>>> Max connections limit: " + connectionLimitLatch.getLimit());
         return connectionLimitLatch;
     }
 

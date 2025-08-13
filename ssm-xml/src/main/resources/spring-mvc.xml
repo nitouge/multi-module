@@ -11,7 +11,7 @@
        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <!-- 自动扫描控制器 -->
-    <context:component-scan base-package="com.lsj.ssm.controller, com.lsj.ssm.web"/>
+    <context:component-scan base-package="com.lsj.ssm.controller,com.lsj.ssm.web"/>
 
     <!-- 视图渲染 -->
     <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">

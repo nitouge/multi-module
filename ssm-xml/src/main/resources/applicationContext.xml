@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- 基础通用配置 -->
+    <context:component-scan base-package="com.lsj.ssm.config,com.lsj.ssm.processor,com.lsj.ssm.service"/>
+
+    <aop:aspectj-autoproxy expose-proxy="true" proxy-target-class="true"/>
+
+    <!-- 配置自定义Bean -->
+    <bean id="person" class="com.lsj.ssm.entity.Person"
+          init-method="customInit" destroy-method="customDestroy"
+          depends-on="address">
+        <property name="username" value="nitouge"/>
+        <property name="address" ref="address"/>
+    </bean>
+
+    <!-- 注册PostProcessor -->
+<!--    <bean class="com.lsj.ssm.processor.AnnoBeanFactoryPostProcessor"/>-->
+<!--    <bean class="com.lsj.ssm.processor.AnnoBeanPostProcessor"/>-->
+
+    <!-- 配置文件 -->
+    <!--<bean id="propertyConfigurer" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="location" value="classpath:db.properties"/>
+    </bean>-->
+
+    <context:property-placeholder location="classpath:db.properties"/>
+
+</beans>

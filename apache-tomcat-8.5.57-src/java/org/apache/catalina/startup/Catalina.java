@@ -32,10 +32,15 @@ import java.util.Map;
 import java.util.logging.LogManager;
 
 import org.apache.catalina.Container;
+import org.apache.catalina.Engine;
+import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.Server;
+import org.apache.catalina.Service;
+import org.apache.catalina.Valve;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.core.StandardWrapper;
 import org.apache.catalina.security.SecurityConfig;
 import org.apache.juli.ClassLoaderLogManager;
 import org.apache.juli.logging.Log;
@@ -132,8 +137,10 @@ public class Catalina {
     // ----------------------------------------------------------- Constructors
 
     public Catalina() {
+        System.out.println("Catalina constructor...");
         setSecurityProtection();
         ExceptionUtils.preload();
+
     }
 
 
@@ -636,7 +643,9 @@ public class Catalina {
 
         // Start the new server
         try {
-            getServer().init();
+            Server serveNew = getServer();
+            System.out.println("Catalina load获取到Server信息: " + serveNew.getAddress() + "," + serveNew.getPort());
+            serveNew.init();
         } catch (LifecycleException e) {
             if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE")) {
                 throw new java.lang.Error(e);
@@ -685,7 +694,79 @@ public class Catalina {
 
         // Start the new server
         try {
-            getServer().start();
+            Server server = getServer();
+            System.out.println("Catalina start server: " + server.getAddress() + "," + server.getPort());
+            server.start();
+            System.out.println("Catalina start server finish");
+
+            System.out.println("\n-----------------------------------------------------------------------------------------------------------------\n");
+            for (Service service : server.findServices()) {
+                System.out.println("【Service Name】: " + service.getName());
+                System.out.println("【Service Domain】: " + service.getDomain());
+
+                Engine engine = service.getContainer();
+                System.out.println("\n【Engine Name】: " + engine.getName());
+                System.out.println("【Engine Domain】: " + engine.getDomain());
+                for (Valve valve : engine.getPipeline().getValves()) {
+                    System.out.println("\t【Engine Valve】: " + valve.getClass().getName());
+                    Valve next = valve.getNext();
+                    if (next != null) {
+                        System.out.println("\t\t >>> next valve: " + next.getClass().getName());
+                    }
+                }
+
+                for (Container hostContainer : engine.findChildren()) {
+                    Host host = (Host) hostContainer;
+                    System.out.println("\n【Host】: " + host);
+                    System.out.println("【Host Name】: " + host.getName());
+                    System.out.println("【Host Domain】: "  + host.getDomain() );
+                    System.out.println("【Host AppBase】: " + host.getAppBase());
+                    for (Valve valve : host.getPipeline().getValves()) {
+                        System.out.println("\t【Host Valve】: " + valve.getClass().getName());
+                        Valve next = valve.getNext();
+                        if (next != null) {
+                            System.out.println("\t\t >>> next valve: " + next.getClass().getName());
+                        }
+                    }
+
+                    for (Container contextContainer : host.findChildren()) {
+                        StandardContext context = (StandardContext) contextContainer;
+                        if (!"ssm-xml".equals(context.getBaseName())) {
+                            continue;
+                        }
+                        System.out.println("\n************************** StandardContext【" + context.getBaseName() + "】**************************\n");
+                        System.out.println("【Context Name】: " + context.getName());
+                        System.out.println("【Context Path】: " + context.getPath());
+                        System.out.println("【Context BaseName】: " + context.getBaseName());
+                        System.out.println("【Context DocBase】: " + context.getDocBase());
+                        for (Valve valve : context.getPipeline().getValves()) {
+                            System.out.println("\t【Context Valve】: " + valve.getClass().getName());
+                            Valve next = valve.getNext();
+                            if (next != null) {
+                                System.out.println("\t\t >>> next valve: " + next.getClass().getName());
+                            }
+                        }
+
+                        for (Container wrapperContainer : context.findChildren()) {
+                            StandardWrapper wrapper = (StandardWrapper) wrapperContainer;
+                            System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~ StandardWrapper【" + wrapper.getName() + "】~~~~~~~~~~~~~~~~~~~~~~");
+                            System.out.println("【Wrapper】: " + wrapper.getName() + " - " + wrapper.getServletClass());
+
+                            for (Valve valve : wrapper.getPipeline().getValves()) {
+                                System.out.println("\t【Wrapper Valve】: " + valve.getClass().getName());
+                                Valve next = valve.getNext();
+                                if (next != null) {
+                                    System.out.println("\t\t >>> next valve: " + next.getClass().getName());
+                                }
+                            }
+                            System.out.println("~~~~~~~~~~~~~~~~~~~~~~ StandardWrapper【" + wrapper.getName() + "】~~~~~~~~~~~~~~~~~~~~~~");
+                        }
+                        System.out.println("\n************************** StandardContext【" + context.getBaseName() + "】**************************");
+                    }
+                }
+            }
+            System.out.println("\n-----------------------------------------------------------------------------------------------------------------\n");
+
         } catch (LifecycleException e) {
             log.fatal(sm.getString("catalina.serverStartFail"), e);
             try {

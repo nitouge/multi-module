@@ -89,6 +89,7 @@ public class Connector extends LifecycleMBeanBase  {
                     "coyoteConnector.protocolHandlerInstantiationFailed"), e);
         } finally {
             this.protocolHandler = p;
+            System.out.println(">>>>>>>>>>>>>>> 初始化ProtocolHandler: " + protocolHandlerClassName);
         }
 
         if (Globals.STRICT_SERVLET_COMPLIANCE) {

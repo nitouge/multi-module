@@ -213,7 +213,6 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
      */
     @Override
     public void bind() throws Exception {
-
         if (!getUseInheritedChannel()) {
             serverSock = ServerSocketChannel.open();
             socketProperties.setProperties(serverSock.socket());
@@ -253,17 +252,12 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
      */
     @Override
     public void startInternal() throws Exception {
-
         if (!running) {
             running = true;
             paused = false;
-
-            processorCache = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE,
-                    socketProperties.getProcessorCache());
-            eventCache = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE,
-                            socketProperties.getEventCache());
-            nioChannels = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE,
-                    socketProperties.getBufferPool());
+            processorCache = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE, socketProperties.getProcessorCache());
+            eventCache = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE, socketProperties.getEventCache());
+            nioChannels = new SynchronizedStack<>(SynchronizedStack.DEFAULT_SIZE, socketProperties.getBufferPool());
 
             // Create worker collection
             if ( getExecutor() == null ) {
@@ -276,7 +270,9 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             pollers = new Poller[getPollerThreadCount()];
             for (int i=0; i<pollers.length; i++) {
                 pollers[i] = new Poller();
-                Thread pollerThread = new Thread(pollers[i], getName() + "-ClientPoller-"+i);
+                String threadName = getName() + "-Poller-" + i;
+                System.out.println("启动Poller线程：" + threadName);
+                Thread pollerThread = new Thread(pollers[i], threadName);
                 pollerThread.setPriority(threadPriority);
                 pollerThread.setDaemon(true);
                 pollerThread.start();
@@ -404,7 +400,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             socket.configureBlocking(false);
             Socket sock = socket.socket();
             socketProperties.setProperties(sock);
-
+            System.out.println(">>>>>> Socket properties: " + socketProperties);
             NioChannel channel = nioChannels.pop();
             if (channel == null) {
                 SocketBufferHandler bufhandler = new SocketBufferHandler(
@@ -420,7 +416,9 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 channel.setIOChannel(socket);
                 channel.reset();
             }
-            getPoller0().register(channel);
+            Poller poller0 = getPoller0();
+            poller0.register(channel);
+            System.out.println(">>>>>> Poller: " + poller0 + "register the channel:" + channel);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             try {
@@ -562,6 +560,8 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 if (running && !paused) {
                     if (!nioChannels.push(socket)) {
                         socket.free();
+                    } else {
+                        System.out.println(">>>>>> Nio Channels push the socket:" + socket);
                     }
                 }
             }
@@ -577,9 +577,10 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
      * PollerEvent, cacheable object for poller events to avoid GC
      */
     public static class PollerEvent implements Runnable {
-
         private NioChannel socket;
+
         private int interestOps;
+
         private NioSocketWrapper socketWrapper;
 
         public PollerEvent(NioChannel ch, NioSocketWrapper w, int intOps) {
@@ -600,13 +601,14 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
         public void run() {
             if (interestOps == OP_REGISTER) {
                 try {
-                    socket.getIOChannel().register(
-                            socket.getPoller().getSelector(), SelectionKey.OP_READ, socketWrapper);
+                    socket.getIOChannel().register(socket.getPoller().getSelector(), SelectionKey.OP_READ, socketWrapper);
+                    System.out.println("NioEndpoint >>>>> PollerEvent register to Selector: " + socket.getPoller().getSelector()  + ", SelectionKey.OP_READ: " + SelectionKey.OP_READ);
                 } catch (Exception x) {
                     log.error(sm.getString("endpoint.nio.registerFail"), x);
                 }
             } else {
                 final SelectionKey key = socket.getIOChannel().keyFor(socket.getPoller().getSelector());
+                System.out.println("NioEndpoint >>>>> PollerEvent keyFor SelectionKey: " + key);
                 try {
                     if (key == null) {
                         // The key was cancelled (e.g. due to socket closure)
@@ -646,12 +648,12 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
      * Poller class.
      */
     public class Poller implements Runnable {
-
         private Selector selector;
-        private final SynchronizedQueue<PollerEvent> events =
-                new SynchronizedQueue<>();
+
+        private final SynchronizedQueue<PollerEvent> events = new SynchronizedQueue<>();
 
         private volatile boolean close = false;
+
         private long nextExpiration = 0;//optimize expiration handling
 
         private AtomicLong wakeupCounter = new AtomicLong(0);
@@ -659,7 +661,9 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
         private volatile int keyCount = 0;
 
         public Poller() throws IOException {
+            System.out.println("NioEndpoint >>>>> Poller constructor...");
             this.selector = Selector.open();
+            System.out.println("NioEndpoint >>>>> Poller constructor open Selector: " + selector);
         }
 
         public int getKeyCount() { return keyCount; }
@@ -679,6 +683,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
         private void addEvent(PollerEvent event) {
             events.offer(event);
+            System.out.println("Poller >>>>>> PollerEvent offer: " + event.toString());
             if ( wakeupCounter.incrementAndGet() == 0 ) selector.wakeup();
         }
 
@@ -697,6 +702,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             if ( r==null) r = new PollerEvent(socket,null,interestOps);
             else r.reset(socket,null,interestOps);
             addEvent(r);
+            System.out.println("Poller >>>>>> PollerEvent added: " + r.toString());
             if (close) {
                 NioEndpoint.NioSocketWrapper ka = (NioEndpoint.NioSocketWrapper)socket.getAttachment();
                 processSocket(ka, SocketEvent.STOP, false);
@@ -716,6 +722,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             for (int i = 0, size = events.size(); i < size && (pe = events.poll()) != null; i++ ) {
                 result = true;
                 try {
+                    System.out.println("Poller >>>>>> PollerEvent poll then run and reset : " + pe.toString());
                     pe.run();
                     pe.reset();
                     if (running && !paused) {
@@ -1583,7 +1590,9 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
         @Override
         protected void doRun() {
             NioChannel socket = socketWrapper.getSocket();
-            SelectionKey key = socket.getIOChannel().keyFor(socket.getPoller().getSelector());
+            Selector selector = socket.getPoller().getSelector();
+            System.out.println("SocketProcessor doRun() get selector: " + selector.toString());
+            SelectionKey key = socket.getIOChannel().keyFor(selector);
 
             try {
                 int handshake = -1;

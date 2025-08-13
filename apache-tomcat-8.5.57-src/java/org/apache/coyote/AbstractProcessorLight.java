@@ -71,6 +71,10 @@ public abstract class AbstractProcessorLight implements Processor {
                 state = SocketState.CLOSED;
             }
 
+            System.out.println("AbstractProcessorLight >>> Socket: [" + socketWrapper
+                    + "], Status in: [" + status
+                    + "], State out: [" + state + "]");
+
             if (getLog().isDebugEnabled()) {
                 getLog().debug("Socket: [" + socketWrapper +
                         "], Status in: [" + status +
