@@ -31,10 +31,18 @@ public class UserServiceImpl implements UserService, BeanNameAware, BeanFactoryA
     @Autowired
     private UserMapper userMapper;
 
+    @Transactional(readOnly = true)
     @Override
     public User getUser(Integer id) {
         log.info(">>> UserServiceImpl#getUser id: {}", id);
-        return userMapper.selectOne(id);
+
+        User user = userMapper.selectOne(id);
+        log.info(">>> UserServiceImpl#getUser: {}", user);
+
+        User cacheUser = userMapper.selectOne(id);
+        log.info(">>> UserServiceImpl#getUser: {}", cacheUser);
+
+        return user;
     }
 
     @Override

@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.coyote.AbstractProcessor;
 import org.apache.coyote.ActionCode;
+import org.apache.coyote.Adapter;
 import org.apache.coyote.ErrorState;
 import org.apache.coyote.Request;
 import org.apache.coyote.RequestInfo;

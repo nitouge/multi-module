@@ -17,11 +17,14 @@
 package org.apache.catalina.core;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.Pipeline;
+import org.apache.catalina.Valve;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -44,6 +47,7 @@ final class StandardContextValve extends ValveBase {
 
     public StandardContextValve() {
         super(true);
+        System.out.println(">>>>>> StandardContextValve constructor called");
     }
 
 
@@ -59,8 +63,7 @@ final class StandardContextValve extends ValveBase {
      * @exception ServletException if a servlet error occurred
      */
     @Override
-    public final void invoke(Request request, Response response)
-        throws IOException, ServletException {
+    public final void invoke(Request request, Response response) throws IOException, ServletException {
 
         // Disallow any direct access to resources under WEB-INF or META-INF
         MessageBytes requestPathMB = request.getRequestPathMB();
@@ -74,6 +77,7 @@ final class StandardContextValve extends ValveBase {
 
         // Select the Wrapper to be used for this Request
         Wrapper wrapper = request.getWrapper();
+        System.out.println(">>>>>> StandardContextValve invoke get wrapper: " + wrapper);
         if (wrapper == null || wrapper.isUnavailable()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -93,6 +97,14 @@ final class StandardContextValve extends ValveBase {
         if (request.isAsyncSupported()) {
             request.setAsyncSupported(wrapper.getPipeline().isAsyncSupported());
         }
-        wrapper.getPipeline().getFirst().invoke(request, response);
+        Pipeline pipeline = wrapper.getPipeline();
+        System.out.println(">>>>>> StandardContextValve wrapper pipeline: " + pipeline);
+        Valve[] valves = pipeline.getValves();
+        System.out.println(">>>>>> StandardContextValve valves: " + Arrays.toString(valves));
+        Valve first = pipeline.getFirst();
+        Valve basic = pipeline.getBasic();
+        System.out.println(">>>>>> StandardContextValve first: " + first + ", basic: " + basic);
+
+        first.invoke(request, response);
     }
 }

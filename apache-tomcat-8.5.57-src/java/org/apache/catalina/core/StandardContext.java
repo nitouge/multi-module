@@ -144,8 +144,7 @@ import org.apache.tomcat.util.security.PrivilegedSetTccl;
  * @author Craig R. McClanahan
  * @author Remy Maucherat
  */
-public class StandardContext extends ContainerBase
-        implements Context, NotificationEmitter {
+public class StandardContext extends ContainerBase implements Context, NotificationEmitter {
 
     private static final Log log = LogFactory.getLog(StandardContext.class);
 
@@ -157,9 +156,14 @@ public class StandardContext extends ContainerBase
      * Create a new StandardContext component with the default basic Valve.
      */
     public StandardContext() {
-
         super();
+        System.out.println("\n****************************************************\nStandardContext constructor called");
         pipeline.setBasic(new StandardContextValve());
+        System.out.println("StandardContext pipeline : [" + pipeline.hashCode() + "]"
+                + "\n basic valve: " + pipeline.getBasic()
+                + "\n valves: " + Arrays.toString(pipeline.getValves())
+                + "\n****************************************************\n");
+
         broadcaster = new NotificationBroadcasterSupport();
         // Set defaults
         if (!Globals.STRICT_SERVLET_COMPLIANCE) {
@@ -4900,14 +4904,12 @@ public class StandardContext extends ContainerBase
      */
     @Override
     protected synchronized void startInternal() throws LifecycleException {
-
         if(log.isDebugEnabled())
             log.debug("Starting " + getBaseName());
 
         // Send j2ee.state.starting notification
         if (this.getObjectName() != null) {
-            Notification notification = new Notification("j2ee.state.starting",
-                    this.getObjectName(), sequenceNumber.getAndIncrement());
+            Notification notification = new Notification("j2ee.state.starting", this.getObjectName(), sequenceNumber.getAndIncrement());
             broadcaster.sendNotification(notification);
         }
 
@@ -5003,18 +5005,12 @@ public class StandardContext extends ContainerBase
 
                 // since the loader just started, the webapp classloader is now
                 // created.
-                setClassLoaderProperty("clearReferencesRmiTargets",
-                        getClearReferencesRmiTargets());
-                setClassLoaderProperty("clearReferencesStopThreads",
-                        getClearReferencesStopThreads());
-                setClassLoaderProperty("clearReferencesStopTimerThreads",
-                        getClearReferencesStopTimerThreads());
-                setClassLoaderProperty("clearReferencesHttpClientKeepAliveThread",
-                        getClearReferencesHttpClientKeepAliveThread());
-                setClassLoaderProperty("clearReferencesObjectStreamClassCaches",
-                        getClearReferencesObjectStreamClassCaches());
-                setClassLoaderProperty("clearReferencesThreadLocals",
-                        getClearReferencesThreadLocals());
+                setClassLoaderProperty("clearReferencesRmiTargets", getClearReferencesRmiTargets());
+                setClassLoaderProperty("clearReferencesStopThreads", getClearReferencesStopThreads());
+                setClassLoaderProperty("clearReferencesStopTimerThreads", getClearReferencesStopTimerThreads());
+                setClassLoaderProperty("clearReferencesHttpClientKeepAliveThread", getClearReferencesHttpClientKeepAliveThread());
+                setClassLoaderProperty("clearReferencesObjectStreamClassCaches", getClearReferencesObjectStreamClassCaches());
+                setClassLoaderProperty("clearReferencesThreadLocals", getClearReferencesThreadLocals());
 
                 // By calling unbindThread and bindThread in a row, we setup the
                 // current Thread CCL to be the webapp classloader
@@ -5109,8 +5105,7 @@ public class StandardContext extends ContainerBase
 
             // We put the resources into the servlet context
             if (ok) {
-                getServletContext().setAttribute
-                    (Globals.RESOURCES_ATTR, getResources());
+                getServletContext().setAttribute(Globals.RESOURCES_ATTR, getResources());
 
                 if (getInstanceManager() == null) {
                     javax.naming.Context context = null;
@@ -5122,13 +5117,11 @@ public class StandardContext extends ContainerBase
                     setInstanceManager(new DefaultInstanceManager(context,
                             injectionMap, this, this.getClass().getClassLoader()));
                 }
-                getServletContext().setAttribute(
-                        InstanceManager.class.getName(), getInstanceManager());
+                getServletContext().setAttribute(InstanceManager.class.getName(), getInstanceManager());
                 InstanceManagerBindings.bind(getLoader().getClassLoader(), getInstanceManager());
 
                 // Create context attributes that will be required
-                getServletContext().setAttribute(
-                        JarScanner.class.getName(), getJarScanner());
+                getServletContext().setAttribute(JarScanner.class.getName(), getJarScanner());
 
                 // Make the version info available
                 getServletContext().setAttribute(Globals.WEBAPP_VERSION, getWebappVersion());
@@ -5141,8 +5134,7 @@ public class StandardContext extends ContainerBase
             for (Map.Entry<ServletContainerInitializer, Set<Class<?>>> entry :
                 initializers.entrySet()) {
                 try {
-                    entry.getKey().onStartup(entry.getValue(),
-                            getServletContext());
+                    entry.getKey().onStartup(entry.getValue(), getServletContext());
                 } catch (ServletException e) {
                     log.error(sm.getString("standardContext.sciFail"), e);
                     ok = false;
@@ -5198,6 +5190,16 @@ public class StandardContext extends ContainerBase
             // Unbinding thread
             unbindThread(oldCCL);
         }
+
+        System.out.println("--------------------- Starting StandardContext");
+        System.out.println("Context Path: " + getPath());
+        System.out.println("DocBase: " + getDocBase());
+        System.out.println("BaseName: " + getBaseName());
+        System.out.println("DisplayName: " + getDisplayName());
+        if ("ssm-xml".equals(getBaseName())) {
+            System.out.println("【ssm-xml】 project has valves: " + Arrays.toString(pipeline.getValves()));
+        }
+        System.out.println("--------------------- Starting StandardContext");
 
         // Set available status depending upon startup success
         if (ok) {

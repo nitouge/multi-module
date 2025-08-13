@@ -48,8 +48,7 @@ import org.apache.tomcat.util.res.StringManager;
  *
  * @author Craig R. McClanahan
  */
-public class StandardPipeline extends LifecycleBase
-        implements Pipeline, Contained {
+public class StandardPipeline extends LifecycleBase implements Pipeline, Contained {
 
     private static final Log log = LogFactory.getLog(StandardPipeline.class);
     private static final StringManager sm = StringManager.getManager(Constants.Package);
@@ -61,9 +60,7 @@ public class StandardPipeline extends LifecycleBase
      * Construct a new StandardPipeline instance with no associated Container.
      */
     public StandardPipeline() {
-
         this(null);
-
     }
 
 
@@ -74,10 +71,9 @@ public class StandardPipeline extends LifecycleBase
      * @param container The container we should be associated with
      */
     public StandardPipeline(Container container) {
-
         super();
         setContainer(container);
-
+        System.out.println("StandardPipeline constructor called and set container : [" + container.getDomain() + "], name:" + container.getName());
     }
 
 

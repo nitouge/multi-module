@@ -19,6 +19,7 @@ package org.apache.catalina.core;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -62,9 +63,14 @@ public class StandardEngine extends ContainerBase implements Engine {
      * Create a new StandardEngine component with the default basic Valve.
      */
     public StandardEngine() {
-
         super();
+        System.out.println("\n****************************************************\nStandardEngine constructor called");
         pipeline.setBasic(new StandardEngineValve());
+        System.out.println("StandardEngine pipeline : [" + pipeline + "]"
+                + "\n basic valve: " + pipeline.getBasic()
+                + "\n valves: " + Arrays.toString(pipeline.getValves())
+                + "\n****************************************************\n");
+
         /* Set the jmvRoute using the system property jvmRoute */
         try {
             setJvmRoute(System.getProperty("jvmRoute"));

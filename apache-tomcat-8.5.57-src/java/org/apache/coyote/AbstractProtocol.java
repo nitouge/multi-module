@@ -583,8 +583,10 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         String endpointName = getName();
         endpoint.setName(endpointName.substring(1, endpointName.length()-1));
         endpoint.setDomain(domain);
-        System.out.println("AbstractProtocol initialize endpoint: " + endpoint);
+        System.out.println(">>>>>>>>>>>>>>>> AbstractProtocol init endpoint name: " + endpoint.getName());
+        System.out.println(">>>>>>>>>>>>>>>> AbstractProtocol init endpoint domain: " + endpoint.getDomain());
         endpoint.init();
+        System.out.println(">>>>>>>>>>>>>>>> AbstractProtocol init finish ... endpoint " + endpoint);
     }
 
 
@@ -593,8 +595,9 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         if (getLog().isInfoEnabled()) {
             getLog().info(sm.getString("abstractProtocolHandler.start", getName()));
         }
-        System.out.println("AbstractProtocol start endpoint: " + endpoint);
+        System.out.println(">>>>>>>>>>>>>>>> AbstractProtocol start endpoint: " + endpoint);
         endpoint.start();
+        System.out.println(">>>>>>>>>>>>>>>> AbstractProtocol start endpoint: " + endpoint.getName());
 
         // Start timeout thread
         asyncTimeout = new AsyncTimeout();
@@ -1047,6 +1050,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
                                 + getProtocol().getName() +
                                 ",name=" + getProtocol().getProtocolName() +
                                 "Request" + count);
+                        System.out.println("Register [" + processor + "] as [" + rpName + "]");
                         if (getLog().isDebugEnabled()) {
                             getLog().debug("Register [" + processor + "] as [" + rpName + "]");
                         }

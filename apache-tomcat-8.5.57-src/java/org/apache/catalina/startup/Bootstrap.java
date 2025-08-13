@@ -433,14 +433,17 @@ public final class Bootstrap {
      * @param args Command line arguments to be processed
      */
     public static void main(String args[]) {
-        System.out.println("===================> Tomcat-8.5.57 启动了......");
+        System.out.println("<======================== Tomcat-8.5.57 启动了 ========================>");
 
         synchronized (daemonLock) {
             if (daemon == null) {
                 // Don't set daemon until init() has completed
                 Bootstrap bootstrap = new Bootstrap();
+
                 try {
+                    System.out.println(">>>>>>>>>>>>>>>> Bootstrap init...");
                     bootstrap.init();
+                    System.out.println(">>>>>>>>>>>>>>>> Bootstrap init finished");
                 } catch (Throwable t) {
                     handleThrowable(t);
                     t.printStackTrace();
@@ -469,9 +472,11 @@ public final class Bootstrap {
                 args[args.length - 1] = "stop";
                 daemon.stop();
             } else if (command.equals("start")) {
+                System.out.println(">>>>>>>>>>>>>>>> Bootstrap start...");
                 daemon.setAwait(true);
                 daemon.load(args);
                 daemon.start();
+                System.out.println(">>>>>>>>>>>>>>>> Bootstrap start finished");
                 if (null == daemon.getServer()) {
                     System.exit(1);
                 }
@@ -488,8 +493,7 @@ public final class Bootstrap {
             }
         } catch (Throwable t) {
             // Unwrap the Exception for clearer error reporting
-            if (t instanceof InvocationTargetException &&
-                    t.getCause() != null) {
+            if (t instanceof InvocationTargetException && t.getCause() != null) {
                 t = t.getCause();
             }
             handleThrowable(t);

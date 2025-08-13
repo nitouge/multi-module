@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Globals;
+import org.apache.catalina.Pipeline;
+import org.apache.catalina.Valve;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.connector.ClientAbortException;
 import org.apache.catalina.connector.Request;
@@ -136,7 +138,10 @@ final class StandardHostValve extends ValveBase {
             // application for processing.
             try {
                 if (!response.isErrorReportRequired()) {
-                    context.getPipeline().getFirst().invoke(request, response);
+                    Pipeline pipeline = context.getPipeline();
+                    Valve first = pipeline.getFirst();
+                    System.out.println(">>>>>> StandardHostValve pipeline: " + pipeline + ", first: " + first + " be invoked");
+                    first.invoke(request, response);
                 }
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);

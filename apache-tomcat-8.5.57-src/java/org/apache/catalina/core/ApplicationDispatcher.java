@@ -653,9 +653,7 @@ final class ApplicationDispatcher implements AsyncDispatcher, RequestDispatcher 
      * @exception IOException if an input/output error occurs
      * @exception ServletException if a servlet error occurs
      */
-    private void invoke(ServletRequest request, ServletResponse response,
-            State state) throws IOException, ServletException {
-
+    private void invoke(ServletRequest request, ServletResponse response, State state) throws IOException, ServletException {
         // Checking to see if the context classloader is the current context
         // classloader. If it's not, we're saving it, and setting the context
         // classloader to the Context classloader
@@ -671,15 +669,11 @@ final class ApplicationDispatcher implements AsyncDispatcher, RequestDispatcher 
 
         // Check for the servlet being marked unavailable
         if (wrapper.isUnavailable()) {
-            wrapper.getLogger().warn(
-                    sm.getString("applicationDispatcher.isUnavailable",
-                    wrapper.getName()));
+            wrapper.getLogger().warn(sm.getString("applicationDispatcher.isUnavailable", wrapper.getName()));
             long available = wrapper.getAvailable();
             if ((available > 0L) && (available < Long.MAX_VALUE))
                 hresponse.setDateHeader("Retry-After", available);
-            hresponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, sm
-                    .getString("applicationDispatcher.isUnavailable", wrapper
-                            .getName()));
+            hresponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, sm.getString("applicationDispatcher.isUnavailable", wrapper.getName()));
             unavailable = true;
         }
 
@@ -689,22 +683,18 @@ final class ApplicationDispatcher implements AsyncDispatcher, RequestDispatcher 
                 servlet = wrapper.allocate();
             }
         } catch (ServletException e) {
-            wrapper.getLogger().error(sm.getString("applicationDispatcher.allocateException",
-                             wrapper.getName()), StandardWrapper.getRootCause(e));
+            wrapper.getLogger().error(sm.getString("applicationDispatcher.allocateException", wrapper.getName()), StandardWrapper.getRootCause(e));
             servletException = e;
         } catch (Throwable e) {
             ExceptionUtils.handleThrowable(e);
-            wrapper.getLogger().error(sm.getString("applicationDispatcher.allocateException",
-                             wrapper.getName()), e);
-            servletException = new ServletException
-                (sm.getString("applicationDispatcher.allocateException",
-                              wrapper.getName()), e);
+            wrapper.getLogger().error(sm.getString("applicationDispatcher.allocateException", wrapper.getName()), e);
+            servletException = new ServletException(sm.getString("applicationDispatcher.allocateException", wrapper.getName()), e);
             servlet = null;
         }
 
         // Get the FilterChain Here
-        ApplicationFilterChain filterChain =
-                ApplicationFilterFactory.createFilterChain(request, wrapper, servlet);
+        System.out.println("ApplicationDispatcher create filter chain and the servlet: " + servlet);
+        ApplicationFilterChain filterChain = ApplicationFilterFactory.createFilterChain(request, wrapper, servlet);
 
         // Call the service() method for the allocated servlet instance
         try {
@@ -716,24 +706,20 @@ final class ApplicationDispatcher implements AsyncDispatcher, RequestDispatcher 
         } catch (ClientAbortException e) {
             ioException = e;
         } catch (IOException e) {
-            wrapper.getLogger().error(sm.getString("applicationDispatcher.serviceException",
-                             wrapper.getName()), e);
+            wrapper.getLogger().error(sm.getString("applicationDispatcher.serviceException", wrapper.getName()), e);
             ioException = e;
         } catch (UnavailableException e) {
-            wrapper.getLogger().error(sm.getString("applicationDispatcher.serviceException",
-                             wrapper.getName()), e);
+            wrapper.getLogger().error(sm.getString("applicationDispatcher.serviceException", wrapper.getName()), e);
             servletException = e;
             wrapper.unavailable(e);
         } catch (ServletException e) {
             Throwable rootCause = StandardWrapper.getRootCause(e);
             if (!(rootCause instanceof ClientAbortException)) {
-                wrapper.getLogger().error(sm.getString("applicationDispatcher.serviceException",
-                        wrapper.getName()), rootCause);
+                wrapper.getLogger().error(sm.getString("applicationDispatcher.serviceException", wrapper.getName()), rootCause);
             }
             servletException = e;
         } catch (RuntimeException e) {
-            wrapper.getLogger().error(sm.getString("applicationDispatcher.serviceException",
-                             wrapper.getName()), e);
+            wrapper.getLogger().error(sm.getString("applicationDispatcher.serviceException", wrapper.getName()), e);
             runtimeException = e;
         }
 
@@ -748,16 +734,12 @@ final class ApplicationDispatcher implements AsyncDispatcher, RequestDispatcher 
                 wrapper.deallocate(servlet);
             }
         } catch (ServletException e) {
-            wrapper.getLogger().error(sm.getString("applicationDispatcher.deallocateException",
-                             wrapper.getName()), e);
+            wrapper.getLogger().error(sm.getString("applicationDispatcher.deallocateException", wrapper.getName()), e);
             servletException = e;
         } catch (Throwable e) {
             ExceptionUtils.handleThrowable(e);
-            wrapper.getLogger().error(sm.getString("applicationDispatcher.deallocateException",
-                             wrapper.getName()), e);
-            servletException = new ServletException
-                (sm.getString("applicationDispatcher.deallocateException",
-                              wrapper.getName()), e);
+            wrapper.getLogger().error(sm.getString("applicationDispatcher.deallocateException", wrapper.getName()), e);
+            servletException = new ServletException(sm.getString("applicationDispatcher.deallocateException", wrapper.getName()), e);
         }
 
         // Reset the old context class loader

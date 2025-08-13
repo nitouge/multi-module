@@ -50,9 +50,7 @@ public final class ApplicationFilterFactory {
      * @return The configured FilterChain instance or null if none is to be
      *         executed.
      */
-    public static ApplicationFilterChain createFilterChain(ServletRequest request,
-            Wrapper wrapper, Servlet servlet) {
-
+    public static ApplicationFilterChain createFilterChain(ServletRequest request, Wrapper wrapper, Servlet servlet) {
         // If there is no servlet to execute, return null
         if (servlet == null)
             return null;
@@ -88,8 +86,7 @@ public final class ApplicationFilterFactory {
             return filterChain;
 
         // Acquire the information we will need to match filter mappings
-        DispatcherType dispatcher =
-                (DispatcherType) request.getAttribute(Globals.DISPATCHER_TYPE_ATTR);
+        DispatcherType dispatcher = (DispatcherType) request.getAttribute(Globals.DISPATCHER_TYPE_ATTR);
 
         String requestPath = null;
         Object attribute = request.getAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR);
@@ -106,8 +103,8 @@ public final class ApplicationFilterFactory {
             }
             if (!matchFiltersURL(filterMap, requestPath))
                 continue;
-            ApplicationFilterConfig filterConfig = (ApplicationFilterConfig)
-                    context.findFilterConfig(filterMap.getFilterName());
+
+            ApplicationFilterConfig filterConfig = (ApplicationFilterConfig) context.findFilterConfig(filterMap.getFilterName());
             if (filterConfig == null) {
                 // FIXME - log configuration problem
                 continue;
@@ -122,8 +119,8 @@ public final class ApplicationFilterFactory {
             }
             if (!matchFiltersServlet(filterMap, servletName))
                 continue;
-            ApplicationFilterConfig filterConfig = (ApplicationFilterConfig)
-                    context.findFilterConfig(filterMap.getFilterName());
+
+            ApplicationFilterConfig filterConfig = (ApplicationFilterConfig) context.findFilterConfig(filterMap.getFilterName());
             if (filterConfig == null) {
                 // FIXME - log configuration problem
                 continue;

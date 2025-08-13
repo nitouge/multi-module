@@ -14,7 +14,12 @@
         <!--配置启用下划线转驼峰的映射-->
         <setting name="mapUnderscoreToCamelCase" value="true"/>
 
-        <!--启用二级缓存-->
+        <!--关闭一级缓存，一级缓存默认是开启的，并且它的作用范围是SqlSession级别-->
+        <!--SESSION（默认） 一级缓存作用范围是 SqlSession 生命周期（只要没有关闭或提交，就会使用缓存）-->
+        <!--STATEMENT 每次执行语句都不会使用缓存，相当于禁用了一级缓存-->
+        <setting name="localCacheScope" value="STATEMENT"/>
+
+        <!--关闭二级缓存-->
         <setting name="cacheEnabled" value="false"/>
     </settings>
 

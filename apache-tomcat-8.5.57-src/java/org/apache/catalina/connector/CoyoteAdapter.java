@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.Authenticator;
 import org.apache.catalina.Context;
 import org.apache.catalina.Host;
+import org.apache.catalina.Pipeline;
+import org.apache.catalina.Valve;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.authenticator.AuthenticatorBase;
 import org.apache.catalina.core.AsyncContextImpl;
@@ -336,12 +338,15 @@ public class CoyoteAdapter implements Adapter {
             // request parameters
             postParseSuccess = postParseRequest(req, request, res, response);
             if (postParseSuccess) {
+                Pipeline pipeline = connector.getService().getContainer().getPipeline();
                 //check valves if we support async
-                request.setAsyncSupported(
-                        connector.getService().getContainer().getPipeline().isAsyncSupported());
+                request.setAsyncSupported(pipeline.isAsyncSupported());
                 // Calling the container
-                connector.getService().getContainer().getPipeline().getFirst().invoke(
-                        request, response);
+                Valve first = pipeline.getFirst();
+                Valve basic = pipeline.getBasic();
+                System.out.println(">>>>>> Coyote adapter get pipeline first valve: " + first.toString() + ", basic valve: " + basic.toString());
+                first.invoke(request, response);
+                System.out.println(">>>>>> Coyote adapter first valve invoke finished, and next valve: " + first.getNext());
             }
             if (request.isAsync()) {
                 async = true;
@@ -360,8 +365,7 @@ public class CoyoteAdapter implements Adapter {
                     }
                 }
 
-                Throwable throwable =
-                        (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+                Throwable throwable = (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
 
                 // If an async request was started, is not going to end once
                 // this container thread finishes and an error occurred, trigger

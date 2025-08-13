@@ -19,6 +19,7 @@ package org.apache.catalina.core;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -50,6 +51,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Globals;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
+import org.apache.catalina.Pipeline;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.security.SecurityUtil;
 import org.apache.juli.logging.Log;
@@ -70,13 +72,11 @@ import org.apache.tomcat.util.modeler.Util;
  * @author Remy Maucherat
  */
 @SuppressWarnings("deprecation") // SingleThreadModel
-public class StandardWrapper extends ContainerBase
-    implements ServletConfig, Wrapper, NotificationEmitter {
+public class StandardWrapper extends ContainerBase implements ServletConfig, Wrapper, NotificationEmitter {
 
     private final Log log = LogFactory.getLog(StandardWrapper.class); // must not be static
 
-    protected static final String[] DEFAULT_SERVLET_METHODS = new String[] {
-                                                    "GET", "HEAD", "POST" };
+    protected static final String[] DEFAULT_SERVLET_METHODS = new String[] {"GET", "HEAD", "POST" };
 
     // ----------------------------------------------------------- Constructors
 
@@ -85,12 +85,15 @@ public class StandardWrapper extends ContainerBase
      * Create a new StandardWrapper component with the default basic Valve.
      */
     public StandardWrapper() {
-
         super();
+        System.out.println("\n****************************************************\nStandardWrapper constructor called");
         swValve=new StandardWrapperValve();
         pipeline.setBasic(swValve);
         broadcaster = new NotificationBroadcasterSupport();
-
+        System.out.println("StandardWrapper pipeline : [" + pipeline + "]"
+                + "\n basic valve: " + pipeline.getBasic()
+                + "\n valves: " + Arrays.toString(pipeline.getValves())
+                + "\n****************************************************\n");
     }
 
 

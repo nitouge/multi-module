@@ -22,6 +22,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Host;
+import org.apache.catalina.Pipeline;
+import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
@@ -41,6 +43,7 @@ final class StandardEngineValve extends ValveBase {
     //------------------------------------------------------ Constructor
     public StandardEngineValve() {
         super(true);
+        System.out.println("StandardEngineValve constructor called");
     }
 
 
@@ -67,11 +70,10 @@ final class StandardEngineValve extends ValveBase {
      * @exception ServletException if a servlet error occurred
      */
     @Override
-    public final void invoke(Request request, Response response)
-        throws IOException, ServletException {
-
+    public final void invoke(Request request, Response response) throws IOException, ServletException {
         // Select the Host to be used for this Request
         Host host = request.getHost();
+        System.out.println(">>>>>> StandardEngineValve invoked: " + host);
         if (host == null) {
             response.sendError
                 (HttpServletResponse.SC_BAD_REQUEST,
@@ -84,7 +86,10 @@ final class StandardEngineValve extends ValveBase {
         }
 
         // Ask this Host to process this request
-        host.getPipeline().getFirst().invoke(request, response);
+        Pipeline pipeline = host.getPipeline();
+        Valve first = pipeline.getFirst();
+        System.out.println(">>>>>> StandardEngineValve pipeline: " + pipeline + ", first: " + first);
+        first.invoke(request, response);
 
     }
 }
